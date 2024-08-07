@@ -1,3 +1,9 @@
+{{- define "relabels"}}
+    relabel_configs:
+    - source_labels: [company,job,__address__]
+      separator: '-'
+      target_label: instance
+{{- end}}
 ---
 global:
 {{- if .ScrapeInterval}}
@@ -106,10 +112,11 @@ scrape_configs:
       key_file: ../tls/prometheus.pem
 {{- end}}
     static_configs:
-    - targets:
 {{- range .TiDBStatusAddrs}}
-      - '{{.}}'
+    - targets: ['{{.}}']
+      labels: {company: {{index $.TiDBStatusConfig . "region"}}}
 {{- end}}
+{{template "relabels"}}
   - job_name: "tiproxy"
     honor_labels: true # don't overwrite job & instance labels
     metrics_path: /api/metrics
@@ -137,10 +144,12 @@ scrape_configs:
       key_file: ../tls/prometheus.pem
 {{- end}}
     static_configs:
-    - targets:
 {{- range .TiKVStatusAddrs}}
-      - '{{.}}'
+    - targets: ['{{.}}']
+      labels:
+        company: {{index $.TiKVStatusConfig . "region"}}
 {{- end}}
+{{- template "relabels"}}
   - job_name: "pd"
     honor_labels: true # don't overwrite job & instance labels
 {{- if .TLSEnabled}}
@@ -198,14 +207,18 @@ scrape_configs:
       key_file: ../tls/prometheus.pem
 {{- end}}
     static_configs:
-    - targets:
     {{- range .TiFlashStatusAddrs}}
-       - '{{.}}'
+    - targets: ['{{.}}']
+      labels:
+        company: {{index $.TiFlashStatusConfig . "region"}}
     {{- end}}
     {{- range .TiFlashLearnerStatusAddrs}}
-       - '{{.}}'
+    - targets: ['{{.}}']
+      labels:
+        company: {{index $.TiFlashLearnerStatusConfig . "region"}}
     {{- end}}
 {{- end}}
+{{template "relabels"}}
 {{- if .PumpAddrs}}
   - job_name: 'pump'
     honor_labels: true # don't overwrite job & instance labels

@@ -279,14 +279,28 @@ func (i *MonitorInstance) InitConfig(
 		for i := 0; i < servers.Len(); i++ {
 			kv := servers.Index(i).Interface().(*TiKVSpec)
 			uniqueHosts.Insert(kv.Host)
-			cfig.AddTiKV(kv.Host, uint64(kv.StatusPort))
+			// modify by zhangbing
+			// cfig.AddTiKV(kv.Host, uint64(kv.StatusPort))
+			labels, err := kv.Labels()
+			if err != nil {
+				return err
+			}
+			cfig.AddTiKV(kv.Host, uint64(kv.StatusPort), labels)
+			// modify end
 		}
 	}
 	if servers, found := topoHasField("TiDBServers"); found {
 		for i := 0; i < servers.Len(); i++ {
 			db := servers.Index(i).Interface().(*TiDBSpec)
 			uniqueHosts.Insert(db.Host)
-			cfig.AddTiDB(db.Host, uint64(db.StatusPort))
+			// modify by zhangbing
+			// cfig.AddTiDB(db.Host, uint64(db.StatusPort))
+			labels, err := db.Labels()
+			if err != nil {
+				return err
+			}
+			cfig.AddTiDB(db.Host, uint64(db.StatusPort), labels)
+			// modify end
 		}
 	}
 	if servers, found := topoHasField("TiProxyServers"); found {
@@ -300,8 +314,16 @@ func (i *MonitorInstance) InitConfig(
 		for i := 0; i < servers.Len(); i++ {
 			flash := servers.Index(i).Interface().(*TiFlashSpec)
 			uniqueHosts.Insert(flash.Host)
-			cfig.AddTiFlashLearner(flash.Host, uint64(flash.FlashProxyStatusPort))
-			cfig.AddTiFlash(flash.Host, uint64(flash.StatusPort))
+			// modify by zhangbing
+			// cfig.AddTiFlashLearner(flash.Host, uint64(flash.FlashProxyStatusPort))
+			// cfig.AddTiFlash(flash.Host, uint64(flash.StatusPort))
+			labels, err := flash.Labels()
+			if err != nil {
+				return err
+			}
+			cfig.AddTiFlashLearner(flash.Host, uint64(flash.FlashProxyStatusPort), labels)
+			cfig.AddTiFlash(flash.Host, uint64(flash.StatusPort), labels)
+			// modify end
 		}
 	}
 	if servers, found := topoHasField("PumpServers"); found {
