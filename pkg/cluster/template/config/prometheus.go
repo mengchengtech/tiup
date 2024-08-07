@@ -55,6 +55,12 @@ type PrometheusConfig struct {
 
 	LocalRules   []string
 	RemoteConfig string
+	// add by zhangbing
+	TiDBStatusConfig           map[string]any
+	TiKVStatusConfig           map[string]any
+	TiFlashStatusConfig        map[string]any
+	TiFlashLearnerStatusConfig map[string]any
+	// add end
 }
 
 // NewPrometheusConfig returns a PrometheusConfig
@@ -63,6 +69,12 @@ func NewPrometheusConfig(clusterName, clusterVersion string, enableTLS bool) *Pr
 		ClusterName:            clusterName,
 		TLSEnabled:             enableTLS,
 		HasTiKVAccelerateRules: tidbver.PrometheusHasTiKVAccelerateRules(clusterVersion),
+		// add by zhangbing
+		TiDBStatusConfig:           map[string]any{},
+		TiKVStatusConfig:           map[string]any{},
+		TiFlashStatusConfig:        map[string]any{},
+		TiFlashLearnerStatusConfig: map[string]any{},
+		// add end
 	}
 
 	return cfg
@@ -75,8 +87,16 @@ func (c *PrometheusConfig) AddNodeExpoertor(ip string, port uint64) *PrometheusC
 }
 
 // AddTiDB add a TiDB address
-func (c *PrometheusConfig) AddTiDB(ip string, port uint64) *PrometheusConfig {
+func (c *PrometheusConfig) AddTiDB(ip string, port uint64, labels map[string]string) *PrometheusConfig { // modify by zhangbing
 	c.TiDBStatusAddrs = append(c.TiDBStatusAddrs, utils.JoinHostPort(ip, int(port)))
+	// add by zhangbing
+	key := utils.JoinHostPort(ip, int(port))
+	values := make(map[string]any, len(labels))
+	for k, v := range labels {
+		values[k] = v
+	}
+	c.TiDBStatusConfig[key] = values
+	// add end
 	return c
 }
 
@@ -87,8 +107,16 @@ func (c *PrometheusConfig) AddTiProxy(ip string, port uint64) *PrometheusConfig 
 }
 
 // AddTiKV add a TiKV address
-func (c *PrometheusConfig) AddTiKV(ip string, port uint64) *PrometheusConfig {
+func (c *PrometheusConfig) AddTiKV(ip string, port uint64, labels map[string]string) *PrometheusConfig { // modify by zhangbing
 	c.TiKVStatusAddrs = append(c.TiKVStatusAddrs, utils.JoinHostPort(ip, int(port)))
+	// add by zhangbing
+	key := utils.JoinHostPort(ip, int(port))
+	values := make(map[string]any, len(labels))
+	for k, v := range labels {
+		values[k] = v
+	}
+	c.TiKVStatusConfig[key] = values
+	// add end
 	return c
 }
 
@@ -99,14 +127,30 @@ func (c *PrometheusConfig) AddPD(ip string, port uint64) *PrometheusConfig {
 }
 
 // AddTiFlashLearner add a TiFlash learner address
-func (c *PrometheusConfig) AddTiFlashLearner(ip string, port uint64) *PrometheusConfig {
+func (c *PrometheusConfig) AddTiFlashLearner(ip string, port uint64, labels map[string]string) *PrometheusConfig { // modify by zhangbing
 	c.TiFlashLearnerStatusAddrs = append(c.TiFlashLearnerStatusAddrs, utils.JoinHostPort(ip, int(port)))
+	// add by zhangbing
+	key := utils.JoinHostPort(ip, int(port))
+	values := make(map[string]any, len(labels))
+	for k, v := range labels {
+		values[k] = v
+	}
+	c.TiFlashLearnerStatusConfig[key] = values
+	// add end
 	return c
 }
 
 // AddTiFlash add a TiFlash address
-func (c *PrometheusConfig) AddTiFlash(ip string, port uint64) *PrometheusConfig {
+func (c *PrometheusConfig) AddTiFlash(ip string, port uint64, labels map[string]string) *PrometheusConfig { // modify by zhangbing
 	c.TiFlashStatusAddrs = append(c.TiFlashStatusAddrs, utils.JoinHostPort(ip, int(port)))
+	// add by zhangbing
+	key := utils.JoinHostPort(ip, int(port))
+	values := make(map[string]any, len(labels))
+	for k, v := range labels {
+		values[k] = v
+	}
+	c.TiFlashStatusConfig[key] = values
+	// add end
 	return c
 }
 
